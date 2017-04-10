@@ -106,12 +106,16 @@ public class RequestClient {
             arguments.add(args[i]);
             System.out.println("String "+arguments.get(i));
         }
+        int i = 2;
+        byte b = (byte)i;
+        
+        System.out.println("2 size "+b);
+        System.out.println("10 size "+(byte)10);
         
         requestClient.setArguments(arguments);
         requestClient.bcrypt(requestClient.hash, "aa");
         requestClient.sendData();
         requestClient.receiveData();
-        TimeUnit.MINUTES.wait(1);
     }
 
 }
