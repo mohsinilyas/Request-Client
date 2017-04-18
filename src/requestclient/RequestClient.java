@@ -45,11 +45,11 @@ public class RequestClient {
 
     public void bcrypt(String password, String salt) {
 
-        String hashedPassword = md5(password + salt);
+        String hashedPassword = md5(salt + password);
         hash = hashedPassword;
     }
     
-    public static String md5(String input) {
+    public String md5(String input) {
 
         String md5 = null;
 
@@ -78,6 +78,7 @@ public class RequestClient {
     public void sendData() throws IOException {
         
         byte[] b;
+        message.setCommandNo(CommandType.HASH.getCode());
         message.setHash(hash.toCharArray());
         b = message.convertMessageObjectIntoBytes();
         conn.send(b, serverAddress, serverPort);
@@ -88,8 +89,12 @@ public class RequestClient {
         byte[] b = new byte[1024];
         DatagramPacket dp = conn.receive(b);
         message.parseBytesIntoMessageObject(dp.getData());
-        System.out.println("IT's a command number "+message.getCommandNo());
-        
+        if( message.getCommandNo() == CommandType.DONE_NOT_FOUND.getCode()) {
+            System.out.println("NOT FOUND");
+        }
+        else if ( message.getCommandNo() == CommandType.DONE_FOUND.getCode()) {
+            System.out.println("FOUND: Password: "+message.getKey_range_start()+"; Hash: "+message.getHash());
+        } 
     }
     
     /**
@@ -103,7 +108,7 @@ public class RequestClient {
         RequestClient requestClient = new RequestClient();
        
         for (int i=0 ; i < args.length; i++) {
-            arguments.add(args[i]);
+            RequestClient.arguments.add(args[i]);
             System.out.println("String "+arguments.get(i));
         }
         int i = 2;
@@ -112,8 +117,10 @@ public class RequestClient {
         System.out.println("2 size "+b);
         System.out.println("10 size "+(byte)10);
         
-        requestClient.setArguments(arguments);
+       
+        RequestClient.setArguments(arguments);
         requestClient.bcrypt(requestClient.hash, "aa");
+        System.out.println("hash "+RequestClient.hash);
         requestClient.sendData();
         requestClient.receiveData();
     }
